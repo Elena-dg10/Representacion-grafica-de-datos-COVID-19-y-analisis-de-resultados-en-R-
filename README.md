@@ -11,5 +11,7 @@ En este dataset se corresponde con los casos diarios registrados de COVID-19 �
     3️⃣ DIAGRAMA DE BARRAS
 
 Otros elementos generados en la práctica:
+
    🗂️ R-MARKDOWN
+   
    🗂️ HTML
