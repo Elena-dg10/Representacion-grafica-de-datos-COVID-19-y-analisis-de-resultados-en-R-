@@ -1,0 +1,131 @@
+---
+title: "Actividad 1"
+author: "Elena Díez"
+date: "2024-04-21"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# R Markdown
+
+## Pasos previos: instalación de las librerías y la base de datos.
+
+#### Para poder hacer el Knit final del Rmarkdown necesito establecer un espejo para el repositorio de paquetes que quiero emplear.
+```{r}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+```
+
+#### Instalo las librerías necesarias y las cargo en memoria para poder realizar gráficos y manejar los datos. La librería ggplot2 ya se instaló al iniciar el programa y no hace falta cargarla puesto que se encuentra incluida en tidyverse.
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+#### Cargo mi base de datos de Covid19
+
+```{r}
+estudio1<-read.csv("/Users/emmettdiez/Desktop/Covid19.csv", na.strings = "", fileEncoding = "UTF-8-BOM") %>%   mutate(date=as.Date(as.character(dateRep),"%d/%m/%Y"),month=as.factor(month), year=as.factor(year))
+
+```
+
+## Ejercicio 1
+
+##### Filtro los datos por rango, indicando los valores mínimos y máximos de casos.
+
+```{r}
+estudio1filter <- estudio1 %>% filter(estudio1$cases>0 & estudio1$cases<=1000)
+```
+
+##### Hago el histograma para la distribución global de Covid19.
+
+```{r}
+ggplot(estudio1filter, aes(x=cases))+
+ geom_histogram(fill="skyblue", color="black", binwidth = 100)+
+  labs(title="Distribución casos Covid19 globales",subtitle = "Histograma de casos",
+   x="Casos",
+y='Frecuencia') + 
+ theme_minimal()
+```
+
+## Ejercicio 2
+
+##### Filtro por territorio (Spain) y número de casos mayor que cero.
+
+```{r}
+OlasCountry <- estudio1 %>%   filter(countriesAndTerritories=="Spain" & cases>0)
+
+```
+
+##### Representación de las olas de Covid19 tras el verano (Septiembre-Diciembre).
+
+```{r}
+ggplot(OlasCountry, aes(x=date, y=cases)) +
+  geom_line(color="blue") +
+   labs(title = "Olas año 2020 Covid19 Spain", 
+    subtitle = "Diagrama de lineas",
+     x="Meses 2020", y="Casos Covid19 Spain") +
+  theme_minimal()
+```
+
+Como se observa en la gráfica tenemos **tres olas**. Una hacie el mes de abril, con una **duración** aproximada de dos meses, otra que comienza a principios de julio y tiene el pico máximo a finales de septiembre, con una **duración** aproximada de tres meses y, la tercera ola, comienza a principios de octubre y se extiende hasta diciembre, con el máximo de casos en noviembre y una **duración** de dos meses.
+
+## Ejercicio 3
+
+##### Filtramos los datos por países y por fecha (a partir de verano).
+
+```{r}
+Estudio1Selected <- estudio1 %>%   filter(countriesAndTerritories==c("Spain","Italy","France","Germany", "United_Kingdom") & cases>0)
+
+Estudio1SelectedDate <- Estudio1Selected %>%
+  filter(date >= ("2020-09-01") & date <= ("2020-12-31"))
+```
+
+##### Construimos el gráfico global de casos en los 5 paises:
+
+```{r}
+ggplot(Estudio1SelectedDate,aes(x=date, y=cases, color=countriesAndTerritories, group=countriesAndTerritories)) +
+  geom_line()+
+  labs(title="Paises mas afectados por Covid19",
+       subtitle="Diagrama de lineas",
+       x="Fecha",
+       y="Casos diarios") +
+  theme_minimal()
+```
+
+El **país** que registró **mayor número de casos** fue **Francia**, llegando casi a los 60.000 casos en el mes de **noviembre**.
+
+##### Con la función **facet_wrap()** desglosamos el gráfico para cada país.
+
+```{r}
+ggplot(Estudio1SelectedDate,aes(x=date, y=cases, color=countriesAndTerritories, group=countriesAndTerritories)) +
+  geom_line()+
+  facet_wrap(~ countriesAndTerritories)+
+  labs(title="Paises más afectados por el Covid19",
+       subtitle="Diagrama de lineas",
+       x="Fecha",
+       y="Casos diarios") +
+  theme_minimal()
+```
+
+## Ejercicio 4 
+#Filtramos los datos para eliminar aquellos que sean NA:
+```{r}
+estudio1continentes <- estudio1 %>% filter(!is.na(estudio1$continentExp))
+```
+
+##### Hacemos el gráfico de barras indicando con fill que cada columna será un continente distinto y por tanto se rellenará con un color diferente.
+
+```{r}
+ggplot(estudio1continentes, aes(continentExp, cases, fill=continentExp))+
+  geom_bar(stat = "summary_bin", fun = mean )+
+  labs(title="Casos medios por continente",
+       subtitle = "Diagrama de barras Covid19 (2019 - 2020)",
+       x="Continentes",
+       y="Casos medios") +
+  theme_minimal()
+```
+
+El **continente** con mayor número de **casos medios** registrados en todo el periodo de tiempo recogido en el dataset fue **América**.
+
+
+
